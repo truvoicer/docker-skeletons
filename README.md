@@ -8,5 +8,6 @@ function site_init_script {
 }
 alias site_init_script="site_init_script"
 ```
+```
 bash $(site_init_script) --DOMAIN site.com --PORT 18099 --DB_NAME site_db —DB_USERNAME root —DB_PASSWORD password
 ```
