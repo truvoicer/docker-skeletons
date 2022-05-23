@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  <site_name>:
+    container_name: <site_name>
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - <port>:80
+    env_file:
+      - .env
+    volumes:
+      - ../html:/var/www/html
+#      - ./php/conf.d/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+    networks:
+      - sites-db
+
+volumes:
+  <site_name>:
+
+networks:
+  sites-db:
+    external: true

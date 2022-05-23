@@ -1,7 +1,8 @@
 #!/bin/bash
 
-SCRIPTS_DIR=/Users/michaeltoriola/Projects/Resources/docker/resources/scripts
-SKELETON_PATH=/Users/michaeltoriola/Projects/Resources/docker/docker-ubuntu-skeleton
+DOCKER_PATH=/Users/michaeltoriola/Projects/Resources/docker
+SKELETON_PATH=$DOCKER_PATH/docker-ubuntu-skeleton
+SKELETON_PATH_NGINX=$DOCKER_PATH/docker-ubuntu-nginx-skeleton
 SITES_PATH=/Users/michaeltoriola/Projects/sites
 
 #Declare env_data as associative array
@@ -17,6 +18,7 @@ env_data=(
   [DB_PORT]=${DB_PORT:-13306}
   [SKELETON_PATH]=${SKELETON_PATH:-${SKELETON_PATH}}
   [SITES_PATH]=${SITES_PATH:-${SITES_PATH}}
+  [HTTP_SERVER]=${HTTP_SERVER:-apache}
 )
 
 #Function to check if an array key exists
@@ -54,7 +56,13 @@ clone_skeleton_func() {
       echo "Error, domain not set."
       return;
     fi
-    
+
+    if [ "${env_data[HTTP_SERVER]}" == "nginx" ]; then
+      env_data[SKELETON_PATH]=$SKELETON_PATH_NGINX
+    else 
+      env_data[SKELETON_PATH]=$SKELETON_PATH
+    fi
+
     if [ ! -d "${env_data[SKELETON_PATH]}" ]; then
       echo "Error, skeleton path not valid directory."
       return;
@@ -140,14 +148,14 @@ fi
 create_db=$( create_db_func )
 if [ "$create_db" == 2 ]; then
   echo  "No db specified, skipping..."
-  exit 0
-elif [ "$create_db" == 1 ]; then
-  echo "Successfully generated site"
-  echo "Domain: ${env_data[DOMAIN]}"
-  echo "DB: ${env_data[DB_NAME]}"
-  echo "Site Path: ${env_data[SITES_PATH]}/${env_data[DOMAIN]}"
-  exit 0
 else
   echo "Error creating db, exiting..."
   exit 0
 fi
+
+echo "Successfully generated site"
+echo "Domain: ${env_data[DOMAIN]}"
+if [ "$create_db" == 1 ]; then
+  echo "DB: ${env_data[DB_NAME]}"
+fi
+echo "Site Path: ${env_data[SITES_PATH]}/${env_data[DOMAIN]}"

@@ -13,25 +13,29 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update
 
 # Install nginx, php-fpm and supervisord from ubuntu repository
-RUN apt install -y zip git unzip curl supervisor vim nano build-essential apache2 libapache2-mod-php
+RUN apt install -y zip git unzip curl supervisor vim nano build-essential nginx
 RUN apt install -y php7.4 php7.4-fpm php7.4-curl php7.4-mysql php7.4-xml php7.4-zip php7.4-mbstring php7.4-cli mysql-client
 
 RUN rm -rf /var/lib/apt/lists/*
 RUN apt clean
 
 #Define the ENV variable
-ENV apache_vhost /etc/apache2/sites-available/000-default.conf
+ENV nginx_avail /etc/nginx/sites-available
+ENV nginx_enabled /etc/nginx/sites-enabled
 ENV supervisor_conf /etc/supervisor/supervisord.conf
 
 # Enable PHP-fpm on nginx virtualhost configuration
 
 #Copy supervisor configuration
 COPY ./supervisord.conf ${supervisor_conf}
-COPY ./apache/sites-available/000-default.conf ${apache_vhost}
 
-RUN a2ensite 000-default
-RUN a2enmod rewrite
-RUN a2enmod headers
+#Remove default NGINX vhosts
+RUN rm ${nginx_enabled}/default
+RUN rm ${nginx_avail}/default
+
+#Copy NGINX vhosts
+COPY ./nginx/default.conf ${nginx_avail}/default.conf
+RUN ln -s "${nginx_avail}/default.conf" "${nginx_enabled}/default.conf"
 
 COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
@@ -40,7 +44,7 @@ COPY ./ /var/www/html/
 
 WORKDIR /var/www/html
 
-VOLUME ["/etc/apache2/sites-enabled", "/var/log/apache2"]
+VOLUME ["/etc/nginx/sites-available", "/etc/nginx/sites-enabled", "/var/log/nginx"]
 
 #Web docs
 RUN mkdir -p /run/php

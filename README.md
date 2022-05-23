@@ -3,8 +3,8 @@
 ```
 //alias script
 function site_init_script {
-    script_dir=/Users/michaeltoriola/Projects/Resources/docker/resources/scripts/site-init.sh
-    echo ${script_dir}
+    script_dir=/Users/michaeltoriola/Projects/Resources/docker/resources/scripts
+    echo "$script_dir/site-init.sh"
 }
 alias site_init_script="site_init_script"
 ```
