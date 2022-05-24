@@ -52,21 +52,6 @@ escapeString() {
 }
 
 clone_skeleton_func() {
-    if [ "${env_data[DOMAIN]}" == "FALSE" ]; then
-      echo "Error, domain not set."
-      return;
-    fi
-
-    if [ "${env_data[HTTP_SERVER]}" == "nginx" ]; then
-      env_data[SKELETON_PATH]=$SKELETON_PATH_NGINX
-    else 
-      env_data[SKELETON_PATH]=$SKELETON_PATH
-    fi
-
-    if [ ! -d "${env_data[SKELETON_PATH]}" ]; then
-      echo "Error, skeleton path not valid directory."
-      return;
-    fi
     if [ ! -d "${env_data[SITES_PATH]}" ]; then
       echo "Error, sites path not valid directory."
       return;
@@ -89,7 +74,7 @@ clone_skeleton_func() {
 replace_placeholders_func() {
   machine=$( get_os )
   if [ "$machine" = "Mac" ]; then
-    sed -i '' -e "s/<site_name>/$(escapeString "${env_data[DOMAIN]}")/g" \
+    sed -i '' -e "s/<site_name>/$(escapeString "${env_data[DOMAIN]}-${env_data[HTTP_SERVER]}")/g" \
     -e "s/<port>/$(escapeString "${env_data[PORT]}")/g" "${env_data[SITES_PATH]}/${env_data[DOMAIN]}/docker/docker-compose.yml"
     if [ ! "${env_data[DB_NAME]}" == "FALSE" ]; then
       sed -i '' -e "s/<db_name>/$(escapeString ${env_data[DB_NAME]})/g" "${env_data[SITES_PATH]}/${env_data[DOMAIN]}/docker/.env"
@@ -97,7 +82,7 @@ replace_placeholders_func() {
     echo 1
     return;
   elif [ "$machine" = "Linux" ]; then
-    sed -i -e "s/<site_name>/$(escapeString "${env_data[DOMAIN]}")/g" \
+    sed -i -e "s/<site_name>/$(escapeString "${env_data[DOMAIN]}-${env_data[HTTP_SERVER]}")/g" \
     -e "s/<port>/$(escapeString "${env_data[PORT]}")/g" "${env_data[SITES_PATH]}/${env_data[DOMAIN]}/docker/docker-compose.yml"
     if [ ! "${env_data[DB_NAME]}" == "FALSE" ]; then
       sed -i -e "s/<db_name>/$(escapeString ${env_data[DB_NAME]})/g" "${env_data[SITES_PATH]}/${env_data[DOMAIN]}/docker/.env"
@@ -131,6 +116,24 @@ while [ $# -gt 0 ]; do
   fi
   shift
 done
+
+if [ "${env_data[DOMAIN]}" == "FALSE" ]; then
+  echo "Error, domain not set."
+  exit 0;
+fi
+
+if [ "${env_data[HTTP_SERVER]}" == "nginx" ]; then
+  env_data[SKELETON_PATH]=$SKELETON_PATH_NGINX
+  env_data[SITES_PATH]="${env_data[SITES_PATH]}/nginx"
+else 
+  env_data[SKELETON_PATH]=$SKELETON_PATH
+  env_data[SITES_PATH]="${env_data[SITES_PATH]}/apache"
+fi
+
+if [ ! -d "${env_data[SKELETON_PATH]}" ]; then
+  echo "Error, skeleton path not valid directory."
+  exit 0;
+fi
 
 clone_skeleton=$( clone_skeleton_func )
 if [ ! "$clone_skeleton" == 1 ]; then
