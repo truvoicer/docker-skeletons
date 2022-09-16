@@ -1,9 +1,9 @@
 #!/bin/bash
 
-DOCKER_PATH=/Users/michaeltoriola/Projects/Resources/docker
+DOCKER_PATH=~/projects/resources/docker
 SKELETON_PATH=$DOCKER_PATH/docker-ubuntu-skeleton
 SKELETON_PATH_NGINX=$DOCKER_PATH/docker-ubuntu-nginx-skeleton
-SITES_PATH=/Users/michaeltoriola/Projects/sites
+SITES_PATH=~/projects/sites
 
 #Declare env_data as associative array
 declare -A env_data
